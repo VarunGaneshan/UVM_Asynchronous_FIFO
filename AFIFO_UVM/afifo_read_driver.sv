@@ -15,10 +15,6 @@ class afifo_read_driver extends uvm_driver#(afifo_read_sequence_item);
   
 	virtual task run_phase(uvm_phase phase);
     	super.run_phase(phase);
-	    /*if(!vif.rrst_n)begin// wait until reset is de-asserted then drive inputs
-				`uvm_info(get_type_name(),$sformatf("[%0t] Read Reset", $time),UVM_LOW)
-				@(posedge vif.rrst_n);
-		end*/
 		@(vif.read_drv_cb);
 		forever begin
 			seq_item_port.get_next_item(drv_trans);
@@ -31,9 +27,6 @@ class afifo_read_driver extends uvm_driver#(afifo_read_sequence_item);
 		vif.read_drv_cb.rinc <= drv_trans.rinc;
 		`uvm_info(get_type_name(), $sformatf("[%0t] Driver Driving: rinc=%0b", $time, drv_trans.rinc), UVM_LOW);
 		@(vif.read_drv_cb);
-		/*
-		vif.read_drv_cb.rinc <= 1'b0;
-		@(vif.read_drv_cb);*/
 	endtask
   
 endclass

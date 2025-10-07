@@ -15,10 +15,6 @@ class afifo_write_driver extends uvm_driver#(afifo_write_sequence_item);
   
 	virtual task run_phase(uvm_phase phase);
     	super.run_phase(phase);
-	    /*if(!vif.wrst_n) begin// wait until reset is de-asserted then drive inputs
-				`uvm_info(get_type_name(),$sformatf("[%0t] Write Reset", $time),UVM_LOW);
-				@(posedge vif.wrst_n);
-		end*/
 		@(vif.write_drv_cb);
 		forever begin
 			seq_item_port.get_next_item(drv_trans);
@@ -32,10 +28,6 @@ class afifo_write_driver extends uvm_driver#(afifo_write_sequence_item);
 		vif.write_drv_cb.winc  <= drv_trans.winc;
 		`uvm_info(get_type_name(), $sformatf("[%0t] Driver Driving: winc=%0b, wdata=%0d", $time, drv_trans.winc, drv_trans.wdata), UVM_LOW);
 		@(vif.write_drv_cb);
-		/*
-		vif.write_drv_cb.winc <= 1'b0;
-		vif.write_drv_cb.wdata <= '0;
-		@(vif.write_drv_cb);*/
 	endtask
   
 endclass

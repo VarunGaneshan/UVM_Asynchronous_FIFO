@@ -1,10 +1,10 @@
-class afifo_sanity_test extends uvm_test;
-  `uvm_component_utils(afifo_sanity_test)
+class afifo_simultaneous_wr_test extends uvm_test;
+  `uvm_component_utils(afifo_simultaneous_wr_test)
   afifo_env env;
   afifo_write_sequence write_seq;
   afifo_read_sequence read_seq;
 
-  function new(string name = "afifo_sanity_test",uvm_component parent=null);
+  function new(string name = "afifo_simultaneous_wr_test",uvm_component parent=null);
     super.new(name,parent);
   endfunction : new
 

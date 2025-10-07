@@ -61,13 +61,10 @@ module top;
     uvm_config_db#(virtual afifo_write_if)::set(null,"uvm_test_top.env.write_agent.driver","vif",write_intf);
     uvm_config_db#(virtual afifo_read_if)::set(null,"uvm_test_top.env.read_agent.monitor","vif",read_intf);
     uvm_config_db#(virtual afifo_write_if)::set(null,"uvm_test_top.env.write_agent.monitor","vif",write_intf);
-    // Set interfaces for sequences
-    //uvm_config_db#(virtual afifo_write_if)::set(null,"*write_seq*","vif",write_intf);
-    //uvm_config_db#(virtual afifo_read_if)::set(null,"*read_seq*","vif",read_intf);
   end
   
   initial begin
-    run_test("afifo_sanity_test");
+    run_test("afifo_simultaneous_wr_test");
     #1000;
     $display("Simulation Finished");
     $finish;

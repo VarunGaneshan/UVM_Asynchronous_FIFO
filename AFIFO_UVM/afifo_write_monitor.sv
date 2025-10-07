@@ -19,9 +19,6 @@ class afifo_write_monitor extends uvm_monitor;
   
   virtual task run_phase(uvm_phase phase);
     super.run_phase(phase);
-	  /*@(negedge vif.wrst_n);
-		`uvm_info(get_type_name(),$sformatf("[%0t] Monitor Write Reset", $time),UVM_LOW);
-		@(posedge vif.wrst_n);*/
     repeat (2) @(vif.write_mon_cb);
     forever begin
       monitor_dut();

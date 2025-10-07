@@ -19,9 +19,6 @@ class afifo_read_monitor extends uvm_monitor;
   
   virtual task run_phase(uvm_phase phase);
     super.run_phase(phase);
-	  /*@(negedge vif.rrst_n);
-		`uvm_info(get_type_name(),$sformatf("[%0t] Monitor Read Reset", $time),UVM_LOW);
-		@(posedge vif.rrst_n);*/
     repeat (2) @(vif.read_mon_cb);
     forever begin
       monitor_dut();
