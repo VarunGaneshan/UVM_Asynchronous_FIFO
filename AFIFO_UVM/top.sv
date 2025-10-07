@@ -3,8 +3,7 @@
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 `include "project_configs.sv"
-`include "afifo_write_if.sv"
-`include "afifo_read_if.sv"
+`include "afifo_if.sv"
 `include "FIFO.v"
   `include "afifo_sequence_item.sv"
   `include "afifo_sequence.sv"
@@ -42,25 +41,24 @@ module top;
     #10 wrst_n = 1'b1;
   end
 
-  afifo_read_if read_intf(rclk, rrst_n);
-  afifo_write_if write_intf(wclk, wrst_n);
+  afifo_if intf(wclk, rclk, wrst_n, rrst_n);
 
-  FIFO #(`DATA_WIDTH, `ADDR_WIDTH) dut ( .wclk(write_intf.wclk),
-             .wrst_n(write_intf.wrst_n),
-             .rclk(read_intf.rclk),
-             .rrst_n(read_intf.rrst_n),
-             .wdata(write_intf.wdata),
-             .rdata(read_intf.rdata),
-             .wfull(write_intf.wfull),
-             .rempty(read_intf.rempty),
-             .winc(write_intf.winc),
-             .rinc(read_intf.rinc) );
+  FIFO #(`DATA_WIDTH, `ADDR_WIDTH) dut ( .wclk(intf.wclk),
+             .wrst_n(intf.wrst_n),
+             .rclk(intf.rclk),
+             .rrst_n(intf.rrst_n),
+             .wdata(intf.wdata),
+             .rdata(intf.rdata),
+             .wfull(intf.wfull),
+             .rempty(intf.rempty),
+             .winc(intf.winc),
+             .rinc(intf.rinc) );
 
   initial begin
-    uvm_config_db#(virtual afifo_read_if)::set(null,"uvm_test_top.env.read_agent.driver","vif",read_intf);
-    uvm_config_db#(virtual afifo_write_if)::set(null,"uvm_test_top.env.write_agent.driver","vif",write_intf);
-    uvm_config_db#(virtual afifo_read_if)::set(null,"uvm_test_top.env.read_agent.monitor","vif",read_intf);
-    uvm_config_db#(virtual afifo_write_if)::set(null,"uvm_test_top.env.write_agent.monitor","vif",write_intf);
+    uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.read_agent.driver","vif",intf);
+    uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.write_agent.driver","vif",intf);
+    uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.read_agent.monitor","vif",intf);
+    uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.write_agent.monitor","vif",intf);
   end
   
   initial begin

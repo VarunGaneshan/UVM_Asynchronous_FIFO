@@ -1,6 +1,6 @@
 class afifo_write_driver extends uvm_driver#(afifo_write_sequence_item);
  `uvm_component_utils(afifo_write_driver)
-	virtual afifo_write_if vif;
+	virtual afifo_if vif;
 	afifo_write_sequence_item drv_trans;
 	function new(string name,uvm_component parent);
 		super.new(name,parent);
@@ -8,7 +8,7 @@ class afifo_write_driver extends uvm_driver#(afifo_write_sequence_item);
 
 	function void build_phase(uvm_phase phase);
 		super.build_phase(phase);
-    	if(!uvm_config_db#(virtual afifo_write_if)::get(this,"","vif",vif)) begin
+    	if(!uvm_config_db#(virtual afifo_if)::get(this,"","vif",vif)) begin
       		`uvm_fatal("NOVIF","No virtual interface found")
     end
   endfunction

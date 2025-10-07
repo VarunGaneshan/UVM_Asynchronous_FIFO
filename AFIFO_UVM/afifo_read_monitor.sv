@@ -1,6 +1,6 @@
 class afifo_read_monitor extends uvm_monitor;
   `uvm_component_utils(afifo_read_monitor)
-  virtual afifo_read_if vif;
+  virtual afifo_if vif;
   uvm_analysis_port#(afifo_read_sequence_item) mon_port;
   afifo_read_sequence_item mon_trans;
 
@@ -12,7 +12,7 @@ class afifo_read_monitor extends uvm_monitor;
     
   virtual function void build_phase(uvm_phase phase);
       super.build_phase(phase);
-      if(!uvm_config_db#(virtual afifo_read_if)::get(this, "", "vif", vif)) begin
+      if(!uvm_config_db#(virtual afifo_if)::get(this, "", "vif", vif)) begin
         `uvm_fatal("NOVIF", "No virtual interface found");
       end
   endfunction
