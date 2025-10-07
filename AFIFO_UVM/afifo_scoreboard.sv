@@ -31,7 +31,6 @@ class afifo_scoreboard extends uvm_scoreboard;
     read_port = new("read_port", this);
   endfunction
   
-  // Write analysis port implementation
   virtual function void write_write(afifo_write_sequence_item trans);
     if (trans.winc && !trans.wfull) begin
       // Data should be written to FIFO
@@ -54,7 +53,7 @@ class afifo_scoreboard extends uvm_scoreboard;
         wfull_fail++;
       end else begin
         `uvm_info(get_type_name(), $sformatf("[%0t] WFULL CHECK PASS: wfull=%0b", 
-                 $time, trans.wfull), UVM_HIGH);
+                 $time, trans.wfull), UVM_MEDIUM);
         wfull_pass++;
       end
     end else if (trans.winc && trans.wfull) begin
@@ -62,7 +61,6 @@ class afifo_scoreboard extends uvm_scoreboard;
     end
   endfunction
   
-  // Read analysis port implementation  
   virtual function void write_read(afifo_read_sequence_item trans);
     bit [`DATA_WIDTH-1:0] expected_data;
     
@@ -78,7 +76,7 @@ class afifo_scoreboard extends uvm_scoreboard;
         // Check read data
         if (trans.rdata == expected_data) begin
           `uvm_info(get_type_name(), $sformatf("[%0t] DATA CHECK PASS: rdata=%0d matches expected", 
-                   $time, trans.rdata), UVM_HIGH);
+                   $time, trans.rdata), UVM_MEDIUM);
           write_read_pass++;
         end else begin
           `uvm_error(get_type_name(), $sformatf("[%0t] DATA MISMATCH: Expected=%0d, Actual=%0d", 
@@ -102,7 +100,7 @@ class afifo_scoreboard extends uvm_scoreboard;
         rempty_fail++;
       end else begin
         `uvm_info(get_type_name(), $sformatf("[%0t] REMPTY CHECK PASS: rempty=%0b", 
-                 $time, trans.rempty), UVM_HIGH);
+                 $time, trans.rempty), UVM_MEDIUM);
         rempty_pass++;
       end
     end else if (trans.rinc && trans.rempty) begin
