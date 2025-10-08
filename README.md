@@ -4,6 +4,8 @@
 
 This repository contains a comprehensive **UVM-based verification environment** for an **Asynchronous FIFO** design. The FIFO operates across two independent clock domains (write and read), using Gray code conversion and two-stage synchronizers for safe clock domain crossing.
 
+![My First Board (1)](https://github.com/user-attachments/assets/92dc2c4b-8325-4bf6-9d74-4a3cd35c3032)
+
 ### Key Features
 - **Dual Clock Domain Operation**: Write clock (100 MHz) and Read clock (50 MHz)
 - **8-bit Data Width**: Configurable data bus
