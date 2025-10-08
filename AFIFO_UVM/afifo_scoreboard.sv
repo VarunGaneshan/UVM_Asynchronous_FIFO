@@ -15,6 +15,7 @@ class afifo_scoreboard extends uvm_scoreboard;
   int wfull_pass, wfull_fail;
   int rempty_pass, rempty_fail;
   int write_read_pass, write_read_fail;
+  bit prev_wfull;
   
   function new(string name = "afifo_scoreboard", uvm_component parent);
     super.new(name, parent);
@@ -32,8 +33,9 @@ class afifo_scoreboard extends uvm_scoreboard;
   endfunction
   
   virtual function void write_write(afifo_write_sequence_item trans);
-    if (trans.winc && !trans.wfull) begin
+    if (trans.winc && !prev_wfull) begin
       // Data should be written to FIFO
+      prev_wfull=trans.wfull;
       expected_fifo.push_back(trans.wdata);
       write_count++;
       
@@ -56,8 +58,9 @@ class afifo_scoreboard extends uvm_scoreboard;
                  $time, trans.wfull), UVM_MEDIUM);
         wfull_pass++;
       end
-    end else if (trans.winc && trans.wfull) begin
+    end else if (trans.winc && prev_wfull) begin
       `uvm_info(get_type_name(), $sformatf("[%0t] WRITE BLOCKED: FIFO is full, winc ignored", $time), UVM_MEDIUM);
+      prev_wfull=trans.wfull;
     end
   endfunction
   
