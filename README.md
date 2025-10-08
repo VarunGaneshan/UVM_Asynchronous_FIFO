@@ -43,8 +43,7 @@ afifo/
 │   ├── top.sv                    # Top-level testbench
 │   ├── project_configs.sv        # Global parameters and types
 │   │
-│   ├── afifo_write_if.sv         # Write domain interface
-│   ├── afifo_read_if.sv          # Read domain interface
+│   ├── afifo_if.sv         # interface
 │   │
 │   ├── afifo_sequence_item.sv    # Transaction class
 │   ├── afifo_sequence.sv         # Write/Read sequences
