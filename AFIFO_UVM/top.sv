@@ -59,6 +59,7 @@ module top;
     uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.write_agent.driver","vif",intf);
     uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.read_agent.monitor","vif",intf);
     uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.write_agent.monitor","vif",intf);
+    uvm_config_db#(virtual afifo_if)::set(null,"uvm_test_top.env.scoreboard","vif",intf);
   end
   
   initial begin

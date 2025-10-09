@@ -28,4 +28,12 @@ interface afifo_if(input bit wclk, input bit rclk, input bit wrst_n, input bit r
     input rempty;
   endclocking
 
+  clocking sb_write_mon_cb @(posedge wclk);
+    input wrst_n;
+  endclocking
+
+  clocking sb_read_mon_cb @(posedge rclk);
+    input rrst_n;
+  endclocking
+
 endinterface
