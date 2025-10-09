@@ -7,7 +7,6 @@ class afifo_scoreboard extends uvm_scoreboard;
   uvm_analysis_imp_write#(afifo_write_sequence_item, afifo_scoreboard) write_port;
   uvm_analysis_imp_read#(afifo_read_sequence_item, afifo_scoreboard) read_port;
 
-  // FIFO model to track expected behavior
   bit [`DATA_WIDTH-1:0] expected_fifo [$:`FIFO_DEPTH-1];
   int write_count, read_count;
   int max_depth;
@@ -34,6 +33,21 @@ class afifo_scoreboard extends uvm_scoreboard;
   
   virtual function void write_write(afifo_write_sequence_item trans);
     if (trans.winc && !prev_wfull) begin
+      expected_empty = 0;
+      if (expected_fifo.size() >= max_depth) begin
+        expected_full = 1;
+      end
+
+      // Check wfull signal
+      if (prev_wfull != expected_full) begin
+        `uvm_error(get_type_name(), $sformatf("[%0t] WFULL MISMATCH: Expected=%0b, Actual=%0b, FIFO size=%0d", 
+                  $time, expected_full, prev_wfull, expected_fifo.size()));
+        wfull_fail++;
+      end else begin
+        `uvm_info(get_type_name(), $sformatf("[%0t] WFULL CHECK PASS: wfull=%0b", 
+                 $time, prev_wfull), UVM_MEDIUM);
+        wfull_pass++;
+      end
       // Data should be written to FIFO
       prev_wfull=trans.wfull;
       expected_fifo.push_back(trans.wdata);
@@ -41,23 +55,7 @@ class afifo_scoreboard extends uvm_scoreboard;
       
       `uvm_info(get_type_name(), $sformatf("[%0t] WRITE: data=%0d, fifo_size=%0d", 
                 $time, trans.wdata, expected_fifo.size()), UVM_MEDIUM);
-      
-      // Update expected flags
-      expected_empty = 0;
-      if (expected_fifo.size() >= max_depth) begin
-        expected_full = 1;
-      end
-      
-      // Check wfull signal
-      if (trans.wfull != expected_full) begin
-        `uvm_error(get_type_name(), $sformatf("[%0t] WFULL MISMATCH: Expected=%0b, Actual=%0b, FIFO size=%0d", 
-                  $time, expected_full, trans.wfull, expected_fifo.size()));
-        wfull_fail++;
-      end else begin
-        `uvm_info(get_type_name(), $sformatf("[%0t] WFULL CHECK PASS: wfull=%0b", 
-                 $time, trans.wfull), UVM_MEDIUM);
-        wfull_pass++;
-      end
+
     end else if (trans.winc && prev_wfull) begin
       `uvm_info(get_type_name(), $sformatf("[%0t] WRITE BLOCKED: FIFO is full, winc ignored", $time), UVM_MEDIUM);
       prev_wfull=trans.wfull;
@@ -68,6 +66,10 @@ class afifo_scoreboard extends uvm_scoreboard;
     bit [`DATA_WIDTH-1:0] expected_data;
     
     if (trans.rinc && !trans.rempty) begin
+        if (expected_fifo.size() == 0) begin
+          expected_empty = 1;
+        end
+        expected_full = 0;
       // Data should be read from FIFO
       if (expected_fifo.size() > 0) begin
         expected_data = expected_fifo.pop_front();
@@ -86,12 +88,6 @@ class afifo_scoreboard extends uvm_scoreboard;
                     $time, expected_data, trans.rdata));
           write_read_fail++;
         end
-        
-        // Update expected flags
-        if (expected_fifo.size() == 0) begin
-          expected_empty = 1;
-        end
-        expected_full = 0;
       end else begin
         `uvm_error(get_type_name(), $sformatf("[%0t] UNEXPECTED READ: FIFO model is empty but read occurred", $time));
       end

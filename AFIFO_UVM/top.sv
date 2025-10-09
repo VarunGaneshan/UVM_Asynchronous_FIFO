@@ -62,7 +62,7 @@ module top;
   end
   
   initial begin
-    run_test("afifo_simultaneous_wr_test");
+    run_test();
     #1000;
     $display("Simulation Finished");
     $finish;

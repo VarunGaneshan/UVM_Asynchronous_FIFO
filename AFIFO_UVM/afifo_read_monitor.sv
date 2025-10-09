@@ -29,9 +29,9 @@ class afifo_read_monitor extends uvm_monitor;
 endtask
 
 task monitor_dut();
-	  mon_trans.rinc = vif.rinc;
-    mon_trans.rdata = vif.rdata;
-    mon_trans.rempty = vif.rempty;
+	  mon_trans.rinc = vif.read_mon_cb.rinc;
+    mon_trans.rdata = vif.read_mon_cb.rdata;
+    mon_trans.rempty = vif.read_mon_cb.rempty;
  endtask
 
 endclass    
