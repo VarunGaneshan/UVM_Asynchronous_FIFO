@@ -29,9 +29,9 @@ class afifo_write_monitor extends uvm_monitor;
 endtask
 
 task monitor_dut();
-	  mon_trans.winc = vif.winc;
-    mon_trans.wdata = vif.wdata;
-    mon_trans.wfull = vif.wfull;
+	  mon_trans.winc = vif.write_mon_cb.winc;
+    mon_trans.wdata = vif.write_mon_cb.wdata;
+    mon_trans.wfull = vif.write_mon_cb.wfull;
  endtask
 
 endclass    
