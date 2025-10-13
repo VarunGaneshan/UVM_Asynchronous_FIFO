@@ -15,7 +15,7 @@ import uvm_pkg::*;
   `include "afifo_write_monitor.sv"
   `include "afifo_read_agent.sv"
   `include "afifo_write_agent.sv"
-  `include "afifo_scoreboard.sv"
+  `include "afifo_scoreboard_new.sv"
   `include "afifo_subscriber.sv"
   `include "afifo_bind.sv"
   `include "afifo_assertions.sv"
@@ -67,5 +67,10 @@ module top;
     #1000;
     $display("Simulation Finished");
     $finish;
+  end
+
+  initial begin
+    $dumpfile("afifo.vcd");
+    $dumpvars(0, dut); 
   end
 endmodule

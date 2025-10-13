@@ -18,6 +18,9 @@ module wptr_full #(parameter ADDR_SIZE = 4)(
     wire [ADDR_SIZE:0] wgray_next, wbin_next;   // Next write pointer in gray and binary code
     wire wfull_val;                             // Full flag value
     
+    assign waddr = wbin[ADDR_SIZE-1:0];             // Write address calculation from the write pointer
+    assign wbin_next = wbin + (winc & ~wfull);       // Increment the write pointer if not full
+    assign wgray_next = (wbin_next>>1) ^ wbin_next;    // Convert binary to gray code
     // Synchronous FIFO write pointer (gray code)
     always @(posedge wclk or negedge wrst_n) begin
         if (!wrst_n)            // Reset the FIFO
@@ -25,10 +28,6 @@ module wptr_full #(parameter ADDR_SIZE = 4)(
         else 
             {wbin, wptr} <= {wbin_next, wgray_next}; // Shift the write pointer
     end
-
-    assign waddr = wbin[ADDR_SIZE-1:0];             // Write address calculation from the write pointer
-    assign wbin_next = wbin + (winc & ~wfull);       // Increment the write pointer if not full
-    assign wgray_next = (wbin_next>>1) ^ wbin_next;    // Convert binary to gray code
 
     // Check if the FIFO is full
     //------------------------------------------------------------------
