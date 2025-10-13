@@ -1,4 +1,3 @@
-//In progress
 `uvm_analysis_imp_decl(_w)
 `uvm_analysis_imp_decl(_r)
 
@@ -34,6 +33,13 @@ class afifo_scoreboard extends uvm_scoreboard;
   int rempty_pass = 0;
   int rempty_fail = 0;
 
+  bit [`ADDR_WIDTH:0] wgray_next, wbin_next;
+  bit wfull_val;
+  bit [`ADDR_WIDTH-1:0] waddr;
+  bit [`ADDR_WIDTH:0] rgray_next, rbin_next;
+  bit rempty_val=1;
+  bit [`ADDR_WIDTH-1:0] raddr;
+  bit [`DATA_WIDTH-1:0] expected_data;
 
   function new(string name = "afifo_scoreboard", uvm_component parent);
     super.new(name, parent);
@@ -66,11 +72,7 @@ class afifo_scoreboard extends uvm_scoreboard;
   endfunction
  
   // WRITE PROCESSING
-  virtual function void write_w(afifo_write_sequence_item trans);
-    bit [`ADDR_WIDTH:0] wgray_next, wbin_next;
-    bit wfull_val;
-    bit [`ADDR_WIDTH-1:0] waddr;
-   
+  virtual function void write_w(afifo_write_sequence_item trans);   
     // Handle reset
     if (!vif.wrst_n) begin
       wbin = 0;
@@ -81,13 +83,12 @@ class afifo_scoreboard extends uvm_scoreboard;
       `uvm_info(get_type_name(), $sformatf("[%0t] WRITE DOMAIN RESET", $time), UVM_MEDIUM);
       return;
     end
-   
+    //Display all variables in this function
+    $display("Start[%0t]:wbin=%0d, wptr=%0d,wgray_next=%0d,wbin_next=%0d, wq2_rptr_q1=%0d, wq2_rptr=%0d, wfull=%0b,wfull_val=%0b",$time,
+             wbin, wptr, wgray_next, wbin_next, wq2_rptr_q1, wq2_rptr, wfull, wfull_val);
     // In DUT: always @(posedge wclk) if (wclk_en && !wfull) mem[waddr] <= wdata;
     waddr = wbin[`ADDR_WIDTH-1:0];  // Current write address
-    // In DUT: always @(posedge wclk) {q2, q1} <= {q1, din};
-    wq2_rptr = wq2_rptr_q1;
-    wq2_rptr_q1 = rptr;
-   
+    $display("waddr %0d SB wq2_rptr_q1=%0d, SB wq2_rptr=%0d", waddr, wq2_rptr_q1, wq2_rptr);
     // Check if write happened: winc && !wfull_old
     if (trans.winc && !wfull) begin
       mem[waddr] = trans.wdata;
@@ -98,6 +99,7 @@ class afifo_scoreboard extends uvm_scoreboard;
     //         always @(posedge wclk) {wbin, wptr} <= {wbin_next, wgray_next};
     wbin_next = wbin + (trans.winc & ~wfull);
     wgray_next = bin2gray(wbin_next);
+    $display("write_count:%0d wbin_next=%0d, wgray_next=%0d", write_count, wbin_next, wgray_next);
     end else if (trans.winc && wfull) begin
       `uvm_info(get_type_name(), $sformatf("[%0t] WRITE BLOCKED: FIFO full, Memory contents: %p", $time, mem), UVM_MEDIUM);
     end
@@ -117,34 +119,33 @@ class afifo_scoreboard extends uvm_scoreboard;
     wbin = wbin_next;
     wptr = wgray_next;
     // In DUT: assign wfull_val = (wgray_next=={~wq2_rptr[MSB:MSB-1], wq2_rptr[MSB-2:0]});
-    //         always @(posedge wclk) wfull <= wfull_val;
-    wfull = wfull_val;    
+    //         always @(posedge wclk) wfull <= wfull_val;   
     wfull_val = (wgray_next == {~wq2_rptr[`ADDR_WIDTH:`ADDR_WIDTH-1],
                                     wq2_rptr[`ADDR_WIDTH-2:0]});
+    wfull = wfull_val;
+    // In DUT: always @(posedge wclk) {q2, q1} <= {q1, din};
+    wq2_rptr = wq2_rptr_q1;
+    wq2_rptr_q1 = rptr;
+    $display("End  [%0t]:wbin=%0d, wptr=%0d,wgray_next=%0d,wbin_next=%0d, wq2_rptr_q1=%0d, wq2_rptr=%0d, wfull=%0b,wfull_val=%0b",$time,
+             wbin, wptr, wgray_next, wbin_next, wq2_rptr_q1, wq2_rptr, wfull, wfull_val);
    
   endfunction
  
   // READ PROCESSING
   virtual function void write_r(afifo_read_sequence_item trans);
-    bit [`ADDR_WIDTH:0] rgray_next, rbin_next;
-    bit rempty_val;
-    bit [`ADDR_WIDTH-1:0] raddr;
-    bit [`DATA_WIDTH-1:0] expected_data;
-   
     // Handle reset 
     if (!vif.rrst_n) begin
       rbin = 0;
       rptr = 0;
       rq2_wptr_q1 = 0;
       rq2_wptr = 0;
-      rempty = 1;
+      rempty = 0;
       `uvm_info(get_type_name(), $sformatf("[%0t] READ DOMAIN RESET", $time), UVM_MEDIUM);
       return;
     end
-    // In DUT: always @(posedge rclk) {q2, q1} <= {q1, din};
-    rq2_wptr = rq2_wptr_q1;
-    rq2_wptr_q1 = wptr;
-   
+    //Display all variables in this function
+    $display("Start[%0t]:rbin=%0d, rptr=%0d,rgray_next=%0d,rbin_next=%0d, rq2_wptr_q1=%0d, rq2_wptr=%0d, rempty=%0b,rempty_val=%0b",$time,
+             rbin, rptr, rgray_next, rbin_next, rq2_wptr_q1, rq2_wptr, rempty, rempty_val);
     // Check if read happened: rinc && !rempty_old
     if (trans.rinc && !rempty) begin
       read_count++;
@@ -154,6 +155,7 @@ class afifo_scoreboard extends uvm_scoreboard;
     // In DUT: always @(posedge rclk) if(r_en & !rempty) rdata <= mem[raddr]; 
     raddr = rbin[`ADDR_WIDTH-1:0]; 
     expected_data = mem[raddr];
+    $display("raddr %0d SB rq2_wptr_q1=%0d, SB rq2_wptr=%0d", raddr, rq2_wptr_q1, rq2_wptr);
       // Data check
       if (trans.rdata == expected_data) begin
         `uvm_info(get_type_name(), $sformatf("[%0t] DATA CHECK PASS", $time), UVM_MEDIUM);
@@ -168,6 +170,7 @@ class afifo_scoreboard extends uvm_scoreboard;
     //         always @(posedge rclk) {rbin, rptr} <= {rbin_next, rgray_next};
     rbin_next = rbin + (trans.rinc & ~rempty);
     rgray_next = bin2gray(rbin_next);
+    $display("read_count:%0d rbin_next=%0d, rgray_next=%0d", read_count, rbin_next, rgray_next);
     end else if (trans.rinc && rempty) begin
       `uvm_info(get_type_name(), $sformatf("[%0t] READ BLOCKED: FIFO empty, Memory contents: %p", $time, mem), UVM_MEDIUM);
     end
@@ -190,8 +193,14 @@ class afifo_scoreboard extends uvm_scoreboard;
 
     // In DUT: assign rempty_val = (rgray_next == rq2_wptr);
     //         always @(posedge rclk) rempty <= rempty_val;
-    rempty = rempty_val;
     rempty_val = (rgray_next == rq2_wptr);
+    rempty = rempty_val;
+    // In DUT: always @(posedge rclk) {q2, q1} <= {q1, din};
+    rq2_wptr = rq2_wptr_q1;
+    rq2_wptr_q1 = wptr;
+    $display("End  [%0t]:rbin=%0d, rptr=%0d,rgray_next=%0d,rbin_next=%0d, rq2_wptr_q1=%0d, rq2_wptr=%0d, rempty=%0b,rempty_val=%0b",$time,
+             rbin, rptr, rgray_next, rbin_next, rq2_wptr_q1, rq2_wptr, rempty, rempty_val);
+    
   endfunction
  
   virtual function void report_phase(uvm_phase phase);
