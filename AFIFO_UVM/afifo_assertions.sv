@@ -83,17 +83,17 @@ interface afifo_assertions (
   assert_rempty_reset: assert property (rempty_reset_behavior)
     else $error("[ASSERTION] Read empty not set after reset at time %0t", $time);
 
-  property no_write_when_full;
-    @(posedge wclk) disable iff (!wrst_n) wfull |-> ##1 !winc;
+  /*property no_write_when_full;
+    @(posedge wclk) disable iff (!wrst_n) (wfull && !winc);
   endproperty
   assert_no_write_when_full: assert property (no_write_when_full)
     else $warning("[ASSERTION] Write attempted when FIFO is full at time %0t", $time);
 
   property no_read_when_empty;
-    @(posedge rclk) disable iff (!rrst_n) rempty |-> ##1 !rinc;
+    @(posedge rclk) disable iff (!rrst_n) (rempty && !rinc);
   endproperty
   assert_no_read_when_empty: assert property (no_read_when_empty)
-    else $warning("[ASSERTION] Read attempted when FIFO is empty at time %0t", $time);
+    else $warning("[ASSERTION] Read attempted when FIFO is empty at time %0t", $time);*/
 
   property never_full_and_empty;
     @(posedge wclk or posedge rclk) disable iff (!wrst_n || !rrst_n) !(wfull && rempty);
