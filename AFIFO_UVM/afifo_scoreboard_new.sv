@@ -70,7 +70,7 @@ class afifo_scoreboard extends uvm_scoreboard;
  
   // WRITE PROCESSING
   virtual function void write_w(afifo_write_sequence_item trans);   
-    if (!vif.wrst_n) begin
+    if (!vif.sb_write_mon_cb.wrst_n) begin
       wbin = 0;
       wptr = 0;
       wq2_rptr_q1 = 0;
@@ -125,12 +125,12 @@ class afifo_scoreboard extends uvm_scoreboard;
  
   // READ PROCESSING
   virtual function void write_r(afifo_read_sequence_item trans);
-    if (!vif.rrst_n) begin
+    if (!vif.sb_read_mon_cb.rrst_n) begin
       rbin = 0;
       rptr = 0;
       rq2_wptr_q1 = 0;
       rq2_wptr = 0;
-      rempty = 0;
+      rempty = 1;
       `uvm_info(get_type_name(), $sformatf("[%0t] READ DOMAIN RESET", $time), UVM_MEDIUM);
     end
 
